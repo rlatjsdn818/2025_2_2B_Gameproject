@@ -19,10 +19,14 @@ public class Building : MonoBehaviour
 
     public BuildingEvents buildingEvents;
 
+    private DeliveryOrderSystem orderSystem;
+
     // Start is called before the first frame update
     void Start()
     {
         SetupBuilding();
+        orderSystem = FindObjectOfType<DeliveryOrderSystem>();
+        CreateNameTag();
     }
 
     void SetupBuilding()
@@ -33,17 +37,14 @@ public class Building : MonoBehaviour
             Material mat = renderer.material;
             switch (BuildingType)
             {
-                case BuildingType.Restaurant:
+                case BuildingType.Restaurant:  //음식점
                     mat.color = Color.red;
-                    buildingName = "음식점";
                     break;
-                case BuildingType.Customer:
+                case BuildingType.Customer:    //고객집
                     mat.color = Color.green;
-                    buildingName = "고객집";
                     break;
-                case BuildingType.ChargingStation:
+                case BuildingType.ChargingStation:   //충전소
                     mat.color = Color.blue;
-                    buildingName = "충전소";
                     break;
             }
         }
@@ -73,20 +74,47 @@ public class Building : MonoBehaviour
             Debug.Log($"{buildingName}에서 운전자가 떠났습니다.");
         }
     }
+
+    void CreateNameTag()
+    {
+        //건물 위에 이름표 생성
+        GameObject nameTag = new GameObject("NameTag");
+        nameTag.transform.SetParent(transform);
+        nameTag.transform.localPosition = Vector3.up * 1.5f;
+
+        TextMesh textMesh = nameTag.AddComponent<TextMesh>();
+        textMesh.text = buildingName;
+        textMesh.characterSize = 0.2f;
+        textMesh.anchor = TextAnchor.MiddleCenter;
+        textMesh.color = Color.white;
+        textMesh.fontSize = 20;
+
+        nameTag.AddComponent<Bildboard>();
+    }
     void HandleDriverService(DeliveryDriver driver)
     {
         switch(BuildingType)
         {
             case BuildingType.Restaurant:
-                Debug.Log($"{buildingName}에서 음식을 픽업 했습니다.");
+                if(orderSystem != null)
+                {
+                    orderSystem.OnDriverEnteredRestaurant(this);
+                }
                 break;
 
             case BuildingType.Customer:
-                Debug.Log($"{buildingName}에서 배달 완료.");
-                break;
+                if (orderSystem != null)
+                {
+                    orderSystem.OnDriverEnteredCustomer(this);
+                }
+                else
+                {
+                    driver.CompleteDelivery();
+                }
+                    break;
 
             case BuildingType.ChargingStation:
-                Debug.Log($"{buildingName}에서 배터리를 충전 했습니다.");
+                driver.ChangeBattery();
                 break;
         }
     }
