@@ -1,0 +1,19 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class ResourceCube : MonoBehaviour
+{
+    public ResourceType type;
+
+    public void Initialize(ResourceType resourceType)
+    {
+        type = resourceType;
+        Renderer renderer = GetComponent<Renderer>();
+
+        //자원 더 늘려도됨
+        if (resourceType == ResourceType.Wood) renderer.material.color = new Color(0.6f, 0.3f, 0.1f);   //갈색
+        if (resourceType == ResourceType.Metal) renderer.material.color = Color.gray;                   //회색
+
+    }
+}
